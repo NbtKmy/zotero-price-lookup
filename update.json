@@ -1,0 +1,12 @@
+{
+  "addons": {
+    "zotero-price-lookup@nbtkmy.org": {
+      "updates": [
+        {
+          "version": "1.0.0",
+          "update_link": "https://github.com/NbtKmy/zotero-price-lookup/releases/download/v1.0.0/zotero-price-lookup.xpi"
+        }
+      ]
+    }
+  }
+}
