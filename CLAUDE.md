@@ -144,6 +144,11 @@ const obsID = Zotero.Prefs.registerObserver('extensions.plugin-id.myKey', newVal
 Zotero.Prefs.unregisterObserver(obsID);
 ```
 
+### onMainWindowLoad — Window Type Note
+
+The `win` object passed to `onMainWindowLoad(win)` has window type `"navigator:browser"`, **not** `"zotero:main"`.
+Verify with: `win.document.documentElement.getAttribute('windowtype')`
+
 ### Context Menu Registration
 
 ```javascript
