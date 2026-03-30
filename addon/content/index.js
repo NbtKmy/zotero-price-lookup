@@ -3,7 +3,7 @@
   // src/index.ts
   var ZoteroPriceLookup = class {
     constructor(rootURI) {
-      this.menuID = "zotero-price-lookup-action";
+      this.menuRegistered = false;
       this.rootURI = rootURI;
     }
     startup() {
@@ -11,36 +11,38 @@
     }
     shutdown() {
       Zotero.log("ZoteroPriceLookup: shutdown");
+      this.menuRegistered = false;
     }
     onMainWindowLoad(win) {
+      Zotero.log("ZoteroPriceLookup: onMainWindowLoad called");
       const _win = win;
-      Zotero.log(`ZoteroPriceLookup: onMainWindowLoad called, readyState=${_win.document.readyState}`);
-      if (_win.document.readyState === "complete") {
-        this._registerMenu(_win.document);
-      } else {
-        _win.addEventListener("load", () => this._registerMenu(_win.document), { once: true });
+      try {
+        _win.MozXULElement.insertFTLIfNeeded("zotero-price-lookup.ftl");
+        Zotero.log("ZoteroPriceLookup: FTL inserted");
+      } catch (e) {
+        Zotero.log("ZoteroPriceLookup: FTL insert error: " + e);
       }
-    }
-    _registerMenu(doc) {
-      const itemmenu = doc.getElementById("zotero-itemmenu");
-      if (!itemmenu) {
-        Zotero.log("ZoteroPriceLookup: zotero-itemmenu not found");
-        return;
-      }
-      const createEl = doc.createXULElement ? doc.createXULElement.bind(doc) : (tag) => doc.createElementNS("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul", tag);
-      const menuitem = createEl("menuitem");
-      menuitem.id = this.menuID;
-      menuitem.setAttribute("label", "Look up price");
-      menuitem.addEventListener("command", () => {
-        const items = Zotero.getActiveZoteroPane().getSelectedItems();
-        this.lookupPrices(items);
+      if (this.menuRegistered) return;
+      this.menuRegistered = true;
+      Zotero.MenuManager.registerMenu({
+        menuID: "zotero-price-lookup-action",
+        pluginID: "zotero-price-lookup@nbtkmy.org",
+        target: "main/library/item",
+        menus: [
+          {
+            menuType: "menuitem",
+            l10nID: "zotero-price-lookup-menu-label",
+            onCommand: (_event, context) => {
+              const items = context.items || [];
+              this.lookupPrices(items);
+            }
+          }
+        ]
       });
-      itemmenu.appendChild(menuitem);
-      Zotero.log("ZoteroPriceLookup: menu item registered");
+      Zotero.log("ZoteroPriceLookup: menu registered via MenuManager");
     }
-    onMainWindowUnload(win) {
-      const doc = win.document;
-      doc.getElementById(this.menuID)?.remove();
+    onMainWindowUnload(_win) {
+      Zotero.log("ZoteroPriceLookup: onMainWindowUnload called");
     }
     async lookupPrices(items) {
       const books = items.filter((item) => item.itemType === "book");
@@ -118,8 +120,8 @@ ${line}` : line;
       const win = new Zotero.ProgressWindow({ closeOnClick: true });
       win.changeHeadline("Zotero Price Lookup");
       win.addLines(lines, icons);
-      win.startCloseTimer(5e3);
       win.show();
+      win.startCloseTimer(3e3);
     }
   };
   globalThis.ZoteroPriceLookup = ZoteroPriceLookup;

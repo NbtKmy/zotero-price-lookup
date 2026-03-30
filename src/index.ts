@@ -2,7 +2,7 @@ declare const Zotero: any;
 
 class ZoteroPriceLookup {
   private rootURI: string;
-  private menuID = "zotero-price-lookup-action";
+  private menuRegistered = false;
 
   constructor(rootURI: string) {
     this.rootURI = rootURI;
@@ -14,43 +14,46 @@ class ZoteroPriceLookup {
 
   shutdown() {
     Zotero.log("ZoteroPriceLookup: shutdown");
+    this.menuRegistered = false;
   }
 
   onMainWindowLoad(win: Window) {
+    Zotero.log("ZoteroPriceLookup: onMainWindowLoad called");
     const _win = win as any;
-    Zotero.log(`ZoteroPriceLookup: onMainWindowLoad called, readyState=${_win.document.readyState}`);
-    if (_win.document.readyState === "complete") {
-      this._registerMenu(_win.document);
-    } else {
-      _win.addEventListener("load", () => this._registerMenu(_win.document), { once: true });
-    }
-  }
 
-  private _registerMenu(doc: any) {
-    const itemmenu = doc.getElementById("zotero-itemmenu");
-    if (!itemmenu) {
-      Zotero.log("ZoteroPriceLookup: zotero-itemmenu not found");
-      return;
+    // Load plugin FTL into this window's l10n context.
+    // Zotero auto-registers plugin locale files but does not load them into
+    // document l10n automatically (MenuManager TODO). We call insertFTLIfNeeded
+    // ourselves, mirroring the planned MenuManager behavior.
+    try {
+      _win.MozXULElement.insertFTLIfNeeded("zotero-price-lookup.ftl");
+      Zotero.log("ZoteroPriceLookup: FTL inserted");
+    } catch (e) {
+      Zotero.log("ZoteroPriceLookup: FTL insert error: " + e);
     }
 
-    const createEl = doc.createXULElement
-      ? doc.createXULElement.bind(doc)
-      : (tag: string) => doc.createElementNS("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul", tag);
-
-    const menuitem = createEl("menuitem");
-    menuitem.id = this.menuID;
-    menuitem.setAttribute("label", "Look up price");
-    menuitem.addEventListener("command", () => {
-      const items = Zotero.getActiveZoteroPane().getSelectedItems();
-      this.lookupPrices(items);
+    if (this.menuRegistered) return;
+    this.menuRegistered = true;
+    Zotero.MenuManager.registerMenu({
+      menuID: "zotero-price-lookup-action",
+      pluginID: "zotero-price-lookup@nbtkmy.org",
+      target: "main/library/item",
+      menus: [
+        {
+          menuType: "menuitem",
+          l10nID: "zotero-price-lookup-menu-label",
+          onCommand: (_event: any, context: any) => {
+            const items: any[] = context.items || [];
+            this.lookupPrices(items);
+          },
+        },
+      ],
     });
-    itemmenu.appendChild(menuitem);
-    Zotero.log("ZoteroPriceLookup: menu item registered");
+    Zotero.log("ZoteroPriceLookup: menu registered via MenuManager");
   }
 
-  onMainWindowUnload(win: Window) {
-    const doc = (win as any).document;
-    doc.getElementById(this.menuID)?.remove();
+  onMainWindowUnload(_win: Window) {
+    Zotero.log("ZoteroPriceLookup: onMainWindowUnload called");
   }
 
   private async lookupPrices(items: any[]) {
@@ -143,8 +146,8 @@ class ZoteroPriceLookup {
     const win = new Zotero.ProgressWindow({ closeOnClick: true });
     win.changeHeadline("Zotero Price Lookup");
     win.addLines(lines, icons);
-    win.startCloseTimer(5000);
     win.show();
+    win.startCloseTimer(3000);
   }
 }
 

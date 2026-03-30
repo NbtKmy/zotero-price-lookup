@@ -10,9 +10,8 @@ function startup({ id, version, rootURI }, reason) {
     Zotero.log("ZoteroPriceLookup: startup done");
 
     Zotero.initializationPromise.then(() => {
-      Zotero.log("ZoteroPriceLookup: Zotero ready, registering menu");
+      Zotero.log("ZoteroPriceLookup: Zotero ready, loading FTL into initial window");
       const win = Services.wm.getMostRecentWindow("navigator:browser");
-      Zotero.log("ZoteroPriceLookup: main window = " + win);
       if (win) {
         addon.onMainWindowLoad(win);
       }

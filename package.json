@@ -1,6 +1,6 @@
 {
   "name": "zotero-price-lookup",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Look up book prices by ISBN via OpenBD API",
   "scripts": {
     "build": "tsc && node esbuild.mjs",
