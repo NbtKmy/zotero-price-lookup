@@ -1,6 +1,6 @@
 # Zotero Price Lookup
 
-A [Zotero 7](https://www.zotero.org/) plugin that looks up book prices by ISBN via the [OpenBD API](https://openbd.jp/) and writes the result to each item's Extra field.
+A [Zotero 8](https://www.zotero.org/) plugin that looks up book prices by ISBN via the [OpenBD API](https://openbd.jp/) and writes the result to each item's Extra field.
 
 ## Features
 
@@ -11,7 +11,7 @@ A [Zotero 7](https://www.zotero.org/) plugin that looks up book prices by ISBN v
 
 ## Requirements
 
-- Zotero 7.0 or later
+- Zotero 8
 
 ## Installation
 
