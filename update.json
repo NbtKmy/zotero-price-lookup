@@ -4,7 +4,23 @@
       "updates": [
         {
           "version": "2.0.0",
-          "update_link": "https://github.com/NbtKmy/zotero-price-lookup/releases/download/v2.0.0/zotero-price-lookup.xpi"
+          "update_link": "https://github.com/NbtKmy/zotero-price-lookup/releases/download/v2.0.0/zotero-price-lookup.xpi",
+          "applications": {
+            "zotero": {
+              "strict_min_version": "7.0",
+              "strict_max_version": "8.0.*"
+            }
+          }
+        },
+        {
+          "version": "2.0.1",
+          "update_link": "https://github.com/NbtKmy/zotero-price-lookup/releases/download/v2.0.1/zotero-price-lookup.xpi",
+          "applications": {
+            "zotero": {
+              "strict_min_version": "7.0",
+              "strict_max_version": "9.0.*"
+            }
+          }
         }
       ]
     }
